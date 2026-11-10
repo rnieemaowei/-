@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>减脂健康餐随机推荐器</title>
+<style>
+  :root{
+    --bg:#f7f9f4;
+    --card:#ffffff;
+    --accent:#5aa86b;
+    --accent-dark:#3f8a50;
+    --text:#243024;
+    --text-soft:#6b7a6c;
+    --line:#e3ece2;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 15% 10%, #eaf6e6 0%, transparent 55%),
+      radial-gradient(circle at 85% 90%, #fdf4e3 0%, transparent 55%),
+      var(--bg);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    color:var(--text);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:28px 16px 48px;
+  }
+  .wrap{
+    width:100%;
+    max-width:560px;
+  }
+  header{
+    text-align:center;
+    margin-bottom:22px;
+  }
+  header h1{
+    font-size:22px;
+    font-weight:600;
+    letter-spacing:.5px;
+    margin:0 0 8px;
+  }
+  header p{
+    margin:0;
+    font-size:13px;
+    color:var(--text-soft);
+    line-height:1.6;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:26px 22px;
+    box-shadow:0 8px 24px rgba(90,168,107,.08);
+    min-height:250px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;
+    height:5px;
+    background:linear-gradient(90deg,#8ecf9a,#c9e7bd,#f6d9a0);
+  }
+  .placeholder{
+    text-align:center;
+    color:var(--text-soft);
+    font-size:15px;
+    line-height:1.9;
+  }
+  .placeholder .emoji{
+    display:block;
+    font-size:40px;
+    margin-bottom:12px;
+  }
+  .meal-name{
+    font-size:21px;
+    font-weight:600;
+    margin:0 0 18px;
+    line-height:1.4;
+    word-break:break-word;
+  }
+  .meal-name::before{
+    content:"🍽 ";
+    font-size:18px;
+  }
+  .row{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    margin-bottom:14px;
+    font-size:14.5px;
+    line-height:1.75;
+  }
+  .row:last-child{margin-bottom:0;}
+  .label{
+    flex:0 0 auto;
+    color:var(--accent-dark);
+    background:#eef7ec;
+    border-radius:6px;
+    padding:1px 8px;
+    font-size:12.5px;
+    font-weight:600;
+    margin-top:3px;
+    white-space:nowrap;
+  }
+  .value{
+    flex:1;
+    color:var(--text);
+    word-break:break-word;
+  }
+  .kcal{
+    display:inline-block;
+    background:#fdf4e3;
+    color:#b07a22;
+    border-radius:20px;
+    padding:3px 12px;
+    font-size:13px;
+    font-weight:600;
+  }
+  .btn{
+    display:block;
+    width:100%;
+    margin-top:22px;
+    padding:18px 16px;
+    font-size:17px;
+    font-weight:600;
+    letter-spacing:1px;
+    color:#fff;
+    background:linear-gradient(135deg,#6fbf7f,#4e9a5f);
+    border:none;
+    border-radius:16px;
+    cursor:pointer;
+    box-shadow:0 6px 16px rgba(78,154,95,.32);
+    transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  }
+  .btn:hover{filter:brightness(1.05);}
+  .btn:active{
+    transform:translateY(2px) scale(.99);
+    box-shadow:0 3px 10px rgba(78,154,95,.28);
+  }
+  .btn:focus-visible{
+    outline:3px solid #b9e3c0;
+    outline-offset:3px;
+  }
+  .count{
+    text-align:center;
+    font-size:12.5px;
+    color:var(--text-soft);
+    margin-top:14px;
+  }
+  .fade-in{
+    animation:fadeIn .38s ease;
+  }
+  @keyframes fadeIn{
+    from{opacity:0;transform:translateY(8px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+
+  /* 内容区块 */
+  .section{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:22px 22px 24px;
+    margin-top:20px;
+    box-shadow:0 6px 18px rgba(90,168,107,.06);
+  }
+  .section h2{
+    font-size:17px;
+    font-weight:600;
+    margin:0 0 14px;
+    padding-left:12px;
+    position:relative;
+    line-height:1.5;
+  }
+  .section h2::before{
+    content:"";
+    position:absolute;
+    left:0;top:4px;bottom:4px;
+    width:4px;
+    border-radius:2px;
+    background:linear-gradient(180deg,#8ecf9a,#f6d9a0);
+  }
+  .section p{
+    margin:0;
+    font-size:14.5px;
+    line-height:1.95;
+    color:#3a483b;
+    text-align:justify;
+  }
+  .table-wrap{
+    width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+    min-width:300px;
+  }
+  thead th{
+    background:#eef7ec;
+    color:var(--accent-dark);
+    font-weight:600;
+    font-size:13.5px;
+    text-align:left;
+    padding:10px 12px;
+    white-space:nowrap;
+  }
+  thead th:first-child{border-radius:8px 0 0 8px;}
+  thead th:last-child{border-radius:0 8px 8px 0;}
+  tbody td{
+    padding:10px 12px;
+    border-bottom:1px solid var(--line);
+    color:#3a483b;
+    line-height:1.6;
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody td:last-child{
+    font-weight:600;
+    color:#b07a22;
+    white-space:nowrap;
+  }
+  tbody tr:nth-child(even) td{background:#fbfdfa;}
+  .tip{
+    font-size:12.5px;
+    color:var(--text-soft);
+    line-height:1.7;
+    margin-top:12px;
+  }
+
+  @media (max-width:400px){
+    header h1{font-size:19px;}
+    .card{padding:22px 18px;}
+    .meal-name{font-size:19px;}
+    .btn{font-size:16px;padding:16px 14px;}
+    .section{padding:18px 16px 20px;}
+    table{font-size:13px;}
+    thead th,tbody td{padding:9px 10px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .fade-in{animation:none;}
+    .btn{transition:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>减脂健康餐随机推荐器</h1>
+    <p>不知道吃什么？点一下，随机来一份低负担的搭配。</p>
+  </header>
+
+  <div class="card" id="card">
+    <div class="placeholder" id="placeholder">
+      <span class="emoji">🥗</span>
+      点击下方按钮<br>看看今天吃点什么
+    </div>
+  </div>
+
+  <button class="btn" id="randomBtn" type="button">随机推荐一份</button>
+  <div class="count" id="count"></div>
+
+  <!-- 减脂餐搭配的 5 个原则 -->
+  <section class="section">
+    <h2>减脂餐搭配的 5 个原则</h2>
+    <p>
+      减脂餐并不是吃得越少越好，而是要在控制总热量的前提下，把营养搭配得合理，让身体既能消耗脂肪，又不至于饿得难受、代谢下滑。第一，控制总量但不要极端节食，每天的热量缺口控制在 300 到 500 大卡左右比较稳妥，吃得过少容易掉肌肉、反弹更快。第二，保证优质蛋白，每一餐都应有一份肉、蛋、奶或豆制品，帮助维持肌肉和饱腹感。第三，主食优先选择粗粮杂粮，比如糙米、燕麦、紫薯，替换掉部分精制白米面，让血糖更平稳、饿得更慢。第四，蔬菜要占餐盘的一半以上，用大量绿叶菜、瓜茄类填满肚子，热量低又能补充膳食纤维。第五，控制烹饪中的油盐糖，多用蒸、煮、烤、凉拌代替油炸煎炒，并注意少喝含糖饮料。把这五条记住，日常随意组合也能搭配出一份合格又好吃的减脂餐。
+    </p>
+  </section>
+
+  <!-- 常见减脂食材热量速查表 -->
+  <section class="section">
+    <h2>常见减脂食材热量速查表</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>食材</th>
+            <th>每 100 克热量</th>
+            <th>特点</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>鸡胸肉</td>
+            <td>约 110 大卡</td>
+            <td>高蛋白低脂</td>
+          </tr>
+          <tr>
+            <td>西兰花</td>
+            <td>约 34 大卡</td>
+            <td>体积大易饱腹</td>
+          </tr>
+          <tr>
+            <td>番茄</td>
+            <td>约 20 大卡</td>
+            <td>低热量含水分</td>
+          </tr>
+          <tr>
+            <td>黄瓜</td>
+            <td>约 16 大卡</td>
+            <td>低热量清爽</td>
+          </tr>
+          <tr>
+            <td>魔芋丝</td>
+            <td>约 10 大卡</td>
+            <td>几乎零热量</td>
+          </tr>
+          <tr>
+            <td>水煮蛋</td>
+            <td>约 70 大卡（1 个）</td>
+            <td>蛋白质优质</td>
+          </tr>
+          <tr>
+            <td>虾仁</td>
+            <td>约 90 大卡</td>
+            <td>高蛋白低脂</td>
+          </tr>
+          <tr>
+            <td>紫薯</td>
+            <td>约 100 大卡</td>
+            <td>粗粮饱腹强</td>
+          </tr>
+          <tr>
+            <td>燕麦</td>
+            <td>约 370 大卡</td>
+            <td>膳食纤维丰富</td>
+          </tr>
+          <tr>
+            <td>嫩豆腐</td>
+            <td>约 60 大卡</td>
+            <td>植物蛋白温和</td>
+          </tr>
+          <tr>
+            <td>三文鱼</td>
+            <td>约 200 大卡</td>
+            <td>优质脂肪来源</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tip">注：以上为常见食材的参考热量，不同品种、部位和烹饪方式会造成实际数值浮动，仅供参考。</div>
+  </section>
+
+  <!-- 为什么减脂期要保证蛋白质摄入 -->
+  <section class="section">
+    <h2>为什么减脂期要保证蛋白质摄入</h2>
+    <p>
+      减脂的本质是制造热量缺口，但身体在缺少能量时，不只消耗脂肪，也可能分解肌肉来供能。蛋白质恰好是维持肌肉的重要原料，足量摄入能在一定程度上减少肌肉流失，让减掉的更多是脂肪，从而保住基础代谢。基础代谢不掉得太狠，减脂过程才更稳，也更容易保持效果。此外，蛋白质的消化吸收本身就需要消耗更多能量，饱腹感也更强，研究普遍认为同等热量下高蛋白饮食更能减少饥饿、减少夜间嘴馋。一般建议减脂期每公斤体重摄入约 1.2 到 1.6 克蛋白质，来源可以是鸡胸肉、鱼虾、鸡蛋、牛奶、豆制品等，分散在三餐中摄入效果更好。需要提醒的是，蛋白质不是吃得越多越好，有肾脏疾病等特殊情况的人群应先咨询医生再调整摄入量。
+    </p>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // 至少 20 份减脂餐数据
+  var meals = [
+    {
+      name: "鸡胸肉沙拉",
+      ingredients: "鸡胸肉 + 生菜 + 番茄 + 黄瓜",
+      kcal: "约 350 大卡",
+      method: "鸡胸肉水煮切片，蔬菜洗净切块，淋少量橄榄油和柠檬汁拌匀。"
+    },
+    {
+      name: "香煎三文鱼配芦笋",
+      ingredients: "三文鱼 + 芦笋 + 柠檬 + 黑胡椒",
+      kcal: "约 330 大卡",
+      method: "三文鱼用不粘锅少油煎至两面金黄，芦笋焯水，撒黑胡椒、挤柠檬汁。"
+    },
+    {
+      name: "番茄鸡蛋荞麦面",
+      ingredients: "荞麦面 + 番茄 + 鸡蛋 + 小葱",
+      kcal: "约 380 大卡",
+      method: "鸡蛋少油炒散盛出，番茄炒出汁后加荞麦面同煮，回锅鸡蛋，撒葱花。"
+    },
+    {
+      name: "虾仁西兰花",
+      ingredients: "虾仁 + 西兰花 + 蒜末 + 胡萝卜",
+      kcal: "约 260 大卡",
+      method: "西兰花和胡萝卜焯水，虾仁滑炒，加蒜末翻炒，少量盐调味。"
+    },
+    {
+      name: "燕麦牛奶碗",
+      ingredients: "即食燕麦 + 脱脂牛奶 + 蓝莓 + 奇亚籽",
+      kcal: "约 310 大卡",
+      method: "燕麦用热牛奶冲泡 3 分钟，撒上蓝莓和奇亚籽即可。"
+    },
+    {
+      name: "鸡胸肉杂蔬饭",
+      ingredients: "糙米饭 + 鸡胸肉 + 玉米粒 + 青豆",
+      kcal: "约 420 大卡",
+      method: "糙米提前煮熟，鸡胸肉切丁煎熟，与玉米青豆一起拌入米饭。"
+    },
+    {
+      name: "紫薯鸡胸碗",
+      ingredients: "紫薯 + 鸡胸肉 + 生菜 + 水煮蛋",
+      kcal: "约 390 大卡",
+      method: "紫薯蒸熟压块，鸡胸肉水煮撕丝，鸡蛋切半，与生菜装碗。"
+    },
+    {
+      name: "豆腐蔬菜汤",
+      ingredients: "嫩豆腐 + 白菜 + 香菇 + 姜丝",
+      kcal: "约 180 大卡",
+      method: "清水加姜丝煮开，放入白菜、香菇煮软，最后加豆腐煮 2 分钟，少盐调味。"
+    },
+    {
+      name: "牛肉彩椒卷",
+      ingredients: "瘦牛肉片 + 彩椒 + 生菜 + 全麦饼",
+      kcal: "约 400 大卡",
+      method: "牛肉片少油快炒，彩椒切条炒软，与生菜一起卷入全麦饼。"
+    },
+    {
+      name: "清蒸鳕鱼配菠菜",
+      ingredients: "鳕鱼 + 菠菜 + 姜片 + 蒸鱼豉油",
+      kcal: "约 240 大卡",
+      method: "鳕鱼铺姜片上锅蒸 8 分钟，菠菜焯水，淋少量蒸鱼豉油。"
+    },
+    {
+      name: "藜麦蔬菜沙拉",
+      ingredients: "藜麦 + 圣女果 + 紫甘蓝 + 玉米粒",
+      kcal: "约 300 大卡",
+      method: "藜麦煮熟放凉，蔬菜切好，混合后加少许醋和橄榄油拌开。"
+    },
+    {
+      name: "鸡腿肉烤时蔬",
+      ingredients: "去皮鸡腿肉 + 南瓜 + 洋葱 + 西葫芦",
+      kcal: "约 400 大卡",
+      method: "鸡腿肉去皮腌 15 分钟，与切块时蔬一起 200℃ 烤 25 分钟。"
+    },
+    {
+      name: "金枪鱼全麦三明治",
+      ingredients: "水浸金枪鱼 + 全麦面包 + 生菜 + 番茄",
+      kcal: "约 350 大卡",
+      method: "金枪鱼沥水拌少量酸奶，夹入全麦面包，加生菜番茄片。"
+    },
+    {
+      name: "冬瓜排骨汤",
+      ingredients: "冬瓜 + 瘦排骨 + 姜片 + 枸杞",
+      kcal: "约 220 大卡",
+      method: "排骨焯水去沫，与姜片炖 40 分钟，加冬瓜再煮 15 分钟，撇去浮油。"
+    },
+    {
+      name: "低脂鸡肉意面",
+      ingredients: "全麦意面 + 鸡胸肉 + 番茄 + 洋葱",
+      kcal: "约 430 大卡",
+      method: "意面煮至八分熟，鸡胸丁炒熟，番茄洋葱熬成酱，拌入意面翻匀。"
+    },
+    {
+      name: "凉拌魔芋丝",
+      ingredients: "魔芋丝 + 黄瓜丝 + 胡萝卜丝 + 香醋",
+      kcal: "约 120 大卡",
+      method: "魔芋丝焯水过凉，与蔬菜丝混合，加香醋、生抽和少许香油拌匀。"
+    },
+    {
+      name: "鸡蛋牛油果吐司",
+      ingredients: "全麦吐司 + 鸡蛋 + 牛油果 + 黑胡椒",
+      kcal: "约 360 大卡",
+      method: "吐司烤脆，牛油果压泥抹上，放水波蛋或煎蛋，撒黑胡椒。"
+    },
+    {
+      name: "鸡胸肉蔬菜卷饼",
+      ingredients: "鸡胸肉 + 卷心菜 + 胡萝卜 + 春卷皮",
+      kcal: "约 340 大卡",
+      method: "鸡胸肉煮熟撕丝，蔬菜切丝，用春卷皮包好，蘸低脂酱汁。"
+    },
+    {
+      name: "海鲜豆腐蒸蛋",
+      ingredients: "鸡蛋 + 嫩豆腐 + 虾仁 + 葱花",
+      kcal: "约 230 大卡",
+      method: "鸡蛋加温水打匀过滤，放入豆腐和虾仁，上锅蒸 12 分钟，撒葱花。"
+    },
+    {
+      name: "杂粮粥配小菜",
+      ingredients: "小米 + 燕麦 + 红薯 + 凉拌黄瓜",
+      kcal: "约 280 大卡",
+      method: "小米燕麦与红薯块同煮成粥，黄瓜拍碎加蒜末醋拌成小菜。"
+    },
+    {
+      name: "香煎豆腐配绿叶菜",
+      ingredients: "老豆腐 + 菠菜 + 蒜末 + 生抽",
+      kcal: "约 250 大卡",
+      method: "豆腐切厚片少油煎至两面金黄，菠菜蒜末快炒，淋少量生抽。"
+    }
+  ];
+
+  var card = document.getElementById("card");
+  var btn = document.getElementById("randomBtn");
+  var countEl = document.getElementById("count");
+  var lastIndex = -1;
+
+  countEl.textContent = "共 " + meals.length + " 份健康餐备选";
+
+  function escapeHTML(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function pickRandom() {
+    if (meals.length === 1) return 0;
+    var idx = Math.floor(Math.random() * meals.length);
+    if (idx === lastIndex) {
+      idx = (idx + 1 + Math.floor(Math.random() * (meals.length - 1))) % meals.length;
+    }
+    lastIndex = idx;
+    return idx;
+  }
+
+  function render(meal) {
+    card.innerHTML =
+      '<div class="fade-in">' +
+        '<h2 class="meal-name">' + escapeHTML(meal.name) + '</h2>' +
+        '<div class="row">' +
+          '<span class="label">主要食材</span>' +
+          '<span class="value">' + escapeHTML(meal.ingredients) + '</span>' +
+        '</div>' +
+        '<div class="row">' +
+          '<span class="label">热量</span>' +
+          '<span class="value"><span class="kcal">' + escapeHTML(meal.kcal) + '</span></span>' +
+        '</div>' +
+        '<div class="row">' +
+          '<span class="label">简单做法</span>' +
+          '<span class="value">' + escapeHTML(meal.method) + '</span>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function handleClick() {
+    render(meals[pickRandom()]);
+  }
+
+  btn.addEventListener("click", handleClick);
+
+  btn.addEventListener("keydown", function (e) {
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault();
+      handleClick();
+    }
+  });
+})();
+</script>
+</body>
+</html>
